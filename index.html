@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Bibliothèque d'Inès</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>📚 La Bibliothèque d'Inès</h1>
+        <p>Mes lectures et mes avis</p>
+    </header>
+
+    <main>
+        <!-- Formulaire d'ajout de livre -->
+        <section class="form-section">
+            <h2>Ajouter un livre</h2>
+            <form id="book-form">
+                <div class="form-group">
+                    <label for="title">Titre du livre *</label>
+                    <input type="text" id="title" name="title" required placeholder="Ex: Le Petit Prince">
+                </div>
+
+                <div class="form-group">
+                    <label for="author">Auteur</label>
+                    <input type="text" id="author" name="author" placeholder="Ex: Antoine de Saint-Exupéry">
+                </div>
+
+                <div class="form-group">
+                    <button type="button" id="btn-search" class="btn-search">🔍 Rechercher le livre</button>
+                    <p id="search-status" class="search-status"></p>
+                </div>
+
+                <div class="form-group" id="cover-preview" style="display: none;">
+                    <label>Couverture trouvée</label>
+                    <img id="book-cover" src="" alt="Couverture du livre" class="book-cover-preview">
+                    <input type="hidden" id="cover-url" name="cover-url">
+                </div>
+
+                <div class="form-group">
+                    <label for="summary">Résumé</label>
+                    <textarea id="summary" name="summary" rows="3" placeholder="Décris brièvement l'histoire..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="comment">Mon avis *</label>
+                    <textarea id="comment" name="comment" required rows="3" placeholder="Qu'as-tu pensé de ce livre ?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Ma note *</label>
+                    <div class="rating-container">
+                        <input type="radio" id="star5" name="rating" value="5" required>
+                        <label for="star5" class="star">★</label>
+                        <input type="radio" id="star4" name="rating" value="4">
+                        <label for="star4" class="star">★</label>
+                        <input type="radio" id="star3" name="rating" value="3">
+                        <label for="star3" class="star">★</label>
+                        <input type="radio" id="star2" name="rating" value="2">
+                        <label for="star2" class="star">★</label>
+                        <input type="radio" id="star1" name="rating" value="1">
+                        <label for="star1" class="star">★</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">📖 Ajouter le livre</button>
+            </form>
+        </section>
+
+        <!-- Liste des livres -->
+        <section class="books-section">
+            <h2>Mes livres lus <span id="book-count">(0)</span></h2>
+            <div id="books-list" class="books-list">
+                <!-- Les livres seront ajoutés ici par JavaScript -->
+                <p class="empty-message" id="empty-message">Aucun livre pour le moment. Ajoute ton premier livre ! 📚</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Made with ❤️ par Inès - 2026</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
