@@ -98,6 +98,13 @@ async function searchBook() {
 btnSearch.addEventListener('click', searchBook);
 
 // ============================================
+// CONFIGURATION DE SÉCURITÉ
+// ============================================
+
+// Mot de passe pour supprimer des livres (à changer !)
+const MOT_DE_PASSE_ADMIN = "ines2026";
+
+// ============================================
 // GESTION DE LA BASE DE DONNÉES (Firebase Firestore)
 // ============================================
 
@@ -282,13 +289,25 @@ bookForm.addEventListener('submit', async function(event) {
 
 // Fonction pour gérer la suppression (accessible globalement)
 async function handleDelete(bookId) {
-    if (confirm('Es-tu sûre de vouloir supprimer ce livre ?')) {
-        try {
-            await deleteBook(bookId);
-            await displayBooks();
-        } catch (error) {
-            alert('❌ Erreur lors de la suppression. Réessaie plus tard.');
-        }
+    // Demander confirmation
+    if (!confirm('Es-tu sûre de vouloir supprimer ce livre ?')) {
+        return;
+    }
+
+    // Demander le mot de passe
+    const motDePasse = prompt('🔐 Entre le mot de passe pour supprimer :');
+
+    if (motDePasse !== MOT_DE_PASSE_ADMIN) {
+        alert('❌ Mot de passe incorrect !');
+        return;
+    }
+
+    try {
+        await deleteBook(bookId);
+        await displayBooks();
+        alert('✅ Livre supprimé !');
+    } catch (error) {
+        alert('❌ Erreur lors de la suppression. Réessaie plus tard.');
     }
 }
 
