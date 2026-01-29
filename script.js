@@ -101,8 +101,25 @@ btnSearch.addEventListener('click', searchBook);
 // CONFIGURATION DE SÉCURITÉ
 // ============================================
 
-// Mot de passe pour supprimer des livres (à changer !)
+// Mot de passe pour ajouter/supprimer des livres (à changer !)
 const MOT_DE_PASSE_ADMIN = "ines2026";
+
+// Fonction pour vérifier le mot de passe
+function verifierMotDePasse(action) {
+    const motDePasse = prompt(`🔐 Entre le mot de passe pour ${action} :`);
+
+    if (motDePasse === null) {
+        // L'utilisateur a cliqué sur Annuler
+        return false;
+    }
+
+    if (motDePasse !== MOT_DE_PASSE_ADMIN) {
+        alert('❌ Mot de passe incorrect !');
+        return false;
+    }
+
+    return true;
+}
 
 // ============================================
 // GESTION DE LA BASE DE DONNÉES (Firebase Firestore)
@@ -240,6 +257,11 @@ async function displayBooks() {
 bookForm.addEventListener('submit', async function(event) {
     event.preventDefault(); // Empêche le rechargement de la page
 
+    // Vérifier le mot de passe avant d'ajouter
+    if (!verifierMotDePasse('ajouter un livre')) {
+        return;
+    }
+
     // Récupérer les valeurs du formulaire
     const title = document.getElementById('title').value.trim();
     const author = document.getElementById('author').value.trim();
@@ -294,11 +316,8 @@ async function handleDelete(bookId) {
         return;
     }
 
-    // Demander le mot de passe
-    const motDePasse = prompt('🔐 Entre le mot de passe pour supprimer :');
-
-    if (motDePasse !== MOT_DE_PASSE_ADMIN) {
-        alert('❌ Mot de passe incorrect !');
+    // Vérifier le mot de passe
+    if (!verifierMotDePasse('supprimer ce livre')) {
         return;
     }
 
