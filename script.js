@@ -98,35 +98,46 @@ async function searchBook() {
 btnSearch.addEventListener('click', searchBook);
 
 // ============================================
-// GESTION DE LA BASE DE DONNÉES (LocalStorage)
+// GESTION DE LA BASE DE DONNÉES (Firebase Firestore)
 // ============================================
 
-// Fonction pour récupérer les livres depuis le localStorage
-function getBooks() {
-    const books = localStorage.getItem('ines-books');
-    return books ? JSON.parse(books) : [];
+// Fonction pour récupérer les livres depuis Firebase
+async function getBooks() {
+    try {
+        const snapshot = await booksCollection.orderBy('createdAt', 'desc').get();
+        const books = [];
+        snapshot.forEach(doc => {
+            books.push({ id: doc.id, ...doc.data() });
+        });
+        return books;
+    } catch (error) {
+        console.error('Erreur lors de la récupération des livres:', error);
+        return [];
+    }
 }
 
-// Fonction pour sauvegarder les livres dans le localStorage
-function saveBooks(books) {
-    localStorage.setItem('ines-books', JSON.stringify(books));
+// Fonction pour ajouter un livre dans Firebase
+async function addBook(book) {
+    try {
+        book.date = new Date().toLocaleDateString('fr-FR');
+        book.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        const docRef = await booksCollection.add(book);
+        book.id = docRef.id;
+        return book;
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout du livre:', error);
+        throw error;
+    }
 }
 
-// Fonction pour ajouter un livre
-function addBook(book) {
-    const books = getBooks();
-    book.id = Date.now(); // Identifiant unique basé sur le timestamp
-    book.date = new Date().toLocaleDateString('fr-FR');
-    books.unshift(book); // Ajoute au début de la liste
-    saveBooks(books);
-    return book;
-}
-
-// Fonction pour supprimer un livre
-function deleteBook(bookId) {
-    let books = getBooks();
-    books = books.filter(book => book.id !== bookId);
-    saveBooks(books);
+// Fonction pour supprimer un livre de Firebase
+async function deleteBook(bookId) {
+    try {
+        await booksCollection.doc(bookId).delete();
+    } catch (error) {
+        console.error('Erreur lors de la suppression du livre:', error);
+        throw error;
+    }
 }
 
 // ============================================
@@ -159,7 +170,7 @@ function createBookCard(book) {
         </div>` : '';
 
     card.innerHTML = `
-        <button class="btn-delete" onclick="handleDelete(${book.id})" title="Supprimer ce livre">✕</button>
+        <button class="btn-delete" onclick="handleDelete('${book.id}')" title="Supprimer ce livre">✕</button>
         <div class="book-card-content">
             ${coverHtml}
             <div class="book-card-info">
@@ -190,10 +201,13 @@ function escapeHtml(text) {
 }
 
 // Fonction pour afficher tous les livres
-function displayBooks() {
-    const books = getBooks();
+async function displayBooks() {
+    // Afficher un indicateur de chargement
+    booksList.innerHTML = '<p class="loading-message">⏳ Chargement des livres...</p>';
 
-    // Vider la liste (sauf le message vide)
+    const books = await getBooks();
+
+    // Vider la liste
     booksList.innerHTML = '';
 
     // Mettre à jour le compteur
@@ -216,7 +230,7 @@ function displayBooks() {
 // ============================================
 
 // Soumission du formulaire
-bookForm.addEventListener('submit', function(event) {
+bookForm.addEventListener('submit', async function(event) {
     event.preventDefault(); // Empêche le rechargement de la page
 
     // Récupérer les valeurs du formulaire
@@ -245,28 +259,36 @@ bookForm.addEventListener('submit', function(event) {
         coverUrl: coverUrl
     };
 
-    // Ajouter le livre
-    addBook(newBook);
+    try {
+        // Ajouter le livre dans Firebase
+        await addBook(newBook);
 
-    // Réafficher la liste
-    displayBooks();
+        // Réafficher la liste
+        await displayBooks();
 
-    // Réinitialiser le formulaire
-    bookForm.reset();
+        // Réinitialiser le formulaire
+        bookForm.reset();
 
-    // Cacher la prévisualisation de la couverture
-    coverPreview.style.display = 'none';
-    searchStatus.textContent = '';
+        // Cacher la prévisualisation de la couverture
+        coverPreview.style.display = 'none';
+        searchStatus.textContent = '';
 
-    // Message de confirmation
-    alert('📚 Livre ajouté avec succès !');
+        // Message de confirmation
+        alert('📚 Livre ajouté avec succès !');
+    } catch (error) {
+        alert('❌ Erreur lors de l\'ajout du livre. Réessaie plus tard.');
+    }
 });
 
 // Fonction pour gérer la suppression (accessible globalement)
-function handleDelete(bookId) {
+async function handleDelete(bookId) {
     if (confirm('Es-tu sûre de vouloir supprimer ce livre ?')) {
-        deleteBook(bookId);
-        displayBooks();
+        try {
+            await deleteBook(bookId);
+            await displayBooks();
+        } catch (error) {
+            alert('❌ Erreur lors de la suppression. Réessaie plus tard.');
+        }
     }
 }
 
